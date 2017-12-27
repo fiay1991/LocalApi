@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.ExitDao">
+
+	<insert id="addThirdRecord" parameterType="map">
+		INSERT INTO cp_third_record(order_num,record_type,park_id,plate_number,exit_name,is_send,create_time,amount,discount_time,pay_method)
+		VALUES(#{order_num},#{record_type},#{park_id},#{plate_number},#{exit_name},#{is_send},#{create_time},#{amount},#{discount_time},#{pay_method})
+	</insert>
+	<insert id="addExceptionOrder" parameterType="map">
+		INSERT INTO cp_exception_record(park_id,order_num,local_order_id,plate_number,
+															card_id,record_type,device_type,enter_name,
+															exit_name,enter_time,exit_time,enter_image,
+															exit_image,car_type,total_price,payed_price,
+															discount_amout,discount_price,unpay_price,
+															user_account,audit_status)
+		VALUES(#{park_id},#{order_num},#{local_order_id},#{plate_number},
+					#{card_id},#{record_type},#{device_type},#{enter_name},
+					#{exit_name},#{enter_time},#{exit_time},#{enter_image},
+					#{exit_image},#{car_type},#{total_price},#{payed_price},
+					#{discount_amout},#{discount_price},#{unpay_price},
+					#{user_account},#{audit_status})
+	</insert>
+	<insert id="addUnusualOrder" parameterType="map">
+		INSERT INTO cp_exception_record(park_id,order_num,local_order_id,
+															card_id,plate_number,record_type,
+															device_type,enter_name,exit_name,
+															enter_time,exit_time,enter_image,
+															exit_image,car_type,total_price,payed_price,
+															discount_amount,discount_price,
+															unpay_price,user_account,
+															exception_cause) 
+		VALUES(#{park_id},#{order_num},#{local_order_id},
+					 #{card_id},#{plate_number},#{record_type},
+					 #{device_type},#{enter_name},#{exit_name},
+					 #{enter_time},#{exit_time},#{enter_image},
+					 #{exit_image},#{car_type},#{total_price},#{payed_price},
+					 #{discount_amount},#{discount_price},
+					 #{unpay_price},#{user_account},
+					 #{exception_cause})
+	</insert>
+	
+	<select id="checkOutUnusualOrder" resultType="int" parameterType="map">
+		SELECT COUNT(*) FROM cp_exception_record 
+		WHERE park_id=#{park_id} AND plate_number=#{plate_number}
+	</select>
+	
+	<update id="updateUnusualOrder" parameterType="map">
+		UPDATE cp_exception_record 
+		SET order_num=#{order_num},local_order_id=#{local_order_id},card_id=#{card_id},record_type=#{record_type},
+		device_type=#{device_type},enter_name=#{enter_name},exit_name=#{exit_name},enter_time=#{enter_time},
+		exit_time=#{exit_time},enter_image=#{enter_image},exit_image=#{exit_image},car_type=#{car_type},
+		total_price=#{total_price},payed_price=#{payed_price},discount_amount=#{discount_amount},
+		discount_price=#{discount_price},unpay_price=#{unpay_price},user_account=#{user_account}
+		WHERE park_id=#{park_id} AND plate_number=#{plate_number}
+	</update>
+	
+</mapper>

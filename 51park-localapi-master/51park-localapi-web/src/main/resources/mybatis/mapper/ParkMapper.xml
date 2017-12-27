@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.ParkDao">
+	<select id="getParkKey" parameterType="java.lang.String" resultType="map">
+		SELECT private_key,public_key 
+		FROM cp_park_key
+		WHERE park_id=#{value}
+	</select>
+	<select id="getParkIdByCode" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT id 
+		FROM cp_park
+		WHERE park_code=#{value}
+	</select>
+	<select id="getParkCodeById" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT park_code 
+		FROM cp_park
+		WHERE id=#{value}
+	</select>
+	<select id="findAllParkId" parameterType="java.lang.String" resultType="int">
+		SELECT id 
+		FROM cp_park
+	</select>
+	<select id="findBillPath" parameterType="map" resultType="String">
+		SELECT bill_path 
+		FROM cp_park_bill_path 
+		WHERE park_id=#{park_id} 
+		AND time=#{time}
+		LIMIT 1
+	</select>
+	<select id="findBillList" parameterType="map"  resultType="reconciliationVO">
+	<![CDATA[
+		SELECT r.* ,o.cost_after,o.cost_before,o.discount_amount,d.from_type,
+				o.trade_no AS pf_trade_no,o.order_num AS pf_order_num,
+				o.pay_type AS pf_pay_type,o.pay_way AS pf_pay_way,
+				r.local_order_id AS pf_local_order_id,r.pay_time AS pf_pay_time
+		FROM (cp_park_reconciliation_info r LEFT JOIN cp_order_pay_record o 
+		ON r.trade_no=o.trade_no AND o.pay_status=2) 
+		LEFT JOIN cp_order_discount d ON d.trade_no= r.trade_no
+		WHERE r.park_id = #{park_id} AND r.pay_time >=#{time} AND r.pay_time <= #{endTime}
+			UNION
+		SELECT r.* ,o.cost_after,o.cost_before,o.discount_amount,d.from_type,
+				o.trade_no AS pf_trade_no,o.order_num AS pf_order_num,
+				o.pay_type AS pf_pay_type,o.pay_way AS pf_pay_way,
+				e.local_order_id AS pf_local_order_id,o.pay_time AS pf_pay_time
+		FROM (cp_park_reconciliation_info r RIGHT JOIN cp_order_pay_record o 
+		ON r.trade_no=o.trade_no) 
+		LEFT JOIN (SELECT park_id, local_order_id, order_num
+			FROM cp_order_enter en WHERE en.park_id = #{park_id}
+				UNION 
+			SELECT park_id, local_order_id, order_num FROM cp_order_exit ex WHERE ex.park_id = #{park_id}
+		)  e ON  e.order_num =o.order_num
+		LEFT JOIN cp_order_discount d ON d.trade_no= r.trade_no
+		WHERE e.park_id = #{park_id} AND o.pay_time >=#{time} AND o.pay_time <= #{endTime} AND o.pay_status=2
+		]]>
+	</select>
+	<insert id="addReconciliation" parameterType="map">
+		INSERT INTO 
+		cp_park_reconciliation_info(plate_number,park_id,trade_no,order_num,local_order_id,local_price_total,local_price_paid,local_price_discount,local_discount_from,pay_type,pay_way,pay_time,platform_price_total,platform_price_paid,platform_price_discount,result,report_date)
+	    VALUES(#{plate_number},#{park_id},#{trade_no},#{order_num},#{local_order_id},#{local_price_total},#{local_price_paid},#{local_price_discount},#{local_discount_from},#{pay_type},#{pay_way},#{pay_time},#{platform_price_total},#{platform_price_paid},#{platform_price_discount},4,#{report_date})
+	</insert>
+	<insert id="addFinalReconciliation" parameterType="map">
+		INSERT INTO
+		cp_park_reconciliation(park_id,report_date,local_count,local_price_total,local_price_paid,
+										   local_price_discount,platform_count,platform_price_total,
+										   platform_price_paid,platform_price_discount,result) 
+		VALUES(#{park_id},#{report_date},#{local_count},#{local_price_total},#{local_price_paid},
+					 #{local_price_discount},#{platform_count},#{platform_price_total},
+					 #{platform_price_paid},#{platform_price_discount},#{result})
+	</insert>
+	<update id="updateReconciliationInfo" parameterType="reconciliationVO">
+		UPDATE cp_park_reconciliation_info r 
+		SET r.platform_price_total=#{platform_price_total} ,r.platform_price_paid=#{platform_price_paid} ,r.platform_price_discount=#{platform_price_discount} ,r.result=#{result},r.platform_discount_from=#{from_type}
+		WHERE r.trade_no=#{trade_no}
+	</update>
+	<update id="updateFinalReconciliation" parameterType="map">
+		UPDATE cp_park_reconciliation r 
+		SET local_count=#{local_count},local_price_total=#{local_price_total},
+		local_price_paid=#{local_price_paid},local_price_discount=#{local_price_discount},
+		platform_count=#{platform_count},platform_price_total=#{platform_price_total},
+		platform_price_paid=#{platform_price_paid},
+		platform_price_discount=#{platform_price_discount},result=#{result}
+		WHERE park_id=#{park_id} 
+		AND report_date=#{report_date}
+	</update>
+	<insert id="addBillUrl" parameterType="map">
+		INSERT INTO cp_park_bill_path(park_id,time,bill_path,create_time) 
+		VALUES(#{park_id},#{time},#{bill_path},#{create_time})
+	</insert>
+	<insert id="addCheckOut" parameterType="map">
+		INSERT INTO cp_report_checkout(park_id,type,user_account,user_name,
+														 	exit_name,begin_time,end_time,
+															total_number,total_amount,
+															discount_amount,discount_number,upload_time)
+		VALUES(#{parkid},#{type},#{useraccount},#{username},
+					 #{position},#{begintime},#{endtime},
+					 #{total_number},#{total_amount},
+					 #{discount_amount},#{discount_number},#{time})
+	</insert>
+	<insert id="addUnusualOnOff" parameterType="map">
+		INSERT INTO cp_exception_operation(park_id,plate_number,card_id,
+																  device_type,gatepos,gate_type,
+																  source,type,user_account,
+																  gate_photo,plate_image,optime) 
+		VALUES(#{parkid},#{plate},#{cardid},
+					 #{devicetype},#{gatepos},#{gatetype},
+					 #{source},#{type},#{useraccount},
+					 #{gatephoto},#{plateimage},#{optime})
+	</insert>
+	<delete id="delReconciliationByTradeno" parameterType="String">
+		DELETE FROM cp_park_reconciliation_info 
+		WHERE trade_no=#{trade_no}
+	</delete>
+	
+	<select id="checkEquipmentInfo" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM cp_park_equipment 
+		WHERE park_id=#{park_id} 
+		AND `code`=#{code}
+		AND delflag=0
+	</select>
+	
+	<insert id="addEquipmentInfo" parameterType="map">
+		INSERT INTO cp_park_equipment(park_id,code,type,gate_name,ip,port,status,optime)
+		VALUES(#{park_id},#{code},#{type},#{gate_name},#{ip},#{port},#{status},#{optime})
+	</insert>
+	
+	<update id="delEquipmentInfo" parameterType="map">
+		UPDATE cp_park_equipment SET delflag=#{delflag}, update_time=UNIX_TIMESTAMP()
+		 WHERE park_id=#{park_id} AND code=#{code} AND delflag=0
+	</update>
+	
+	<update id="updateEquipmentInfo" parameterType="map">
+		UPDATE cp_park_equipment 
+		SET gate_name=#{gate_name} ,ip=#{ip} ,`port`=#{port} ,type=#{type},optime=#{optime} ,`status`=#{status},
+		 update_time=UNIX_TIMESTAMP()
+		WHERE park_id=#{park_id} AND `code`=#{code} AND delflag=0
+	</update>
+	
+	<update id="updateEquipmentStatus" parameterType="map">
+		UPDATE cp_park_equipment 
+		SET `status`=#{status} ,update_time=#{update_time} ,fault_reason=#{fault_reason}
+		WHERE park_id=#{park_id} AND `code`=#{code} AND delflag=0
+	</update>
+	
+	<select id="findAuthorizeById" parameterType="String" resultType="map">
+		SELECT * FROM cp_park_auth WHERE id=#{id}
+	</select>
+	<select id="findChargingRoleById" parameterType="String" resultType="map">
+		SELECT * FROM cp_park_feesrule WHERE id=#{id}
+	</select>
+	<select id="findOrderNum" parameterType="String" resultType="String">
+		SELECT order_Num FROM cp_order_exit WHERE local_order_id=#{local_orderid}
+	</select>
+	<update id="updateFinalReconciliationResult" parameterType="map">
+		UPDATE cp_park_reconciliation 
+		SET result = #{result} 
+		WHERE park_id = #{park_id} 
+		AND report_date = #{report_date}
+	</update>
+	<update id="updateBillUrl" parameterType="map">
+		UPDATE cp_park_bill_path 
+		SET bill_path = #{bill_path}
+		WHERE park_id = #{park_id}
+		AND time = #{time}
+	</update>
+	
+	<insert id="addReconciliationInfo" parameterType="reconciliationVO">
+		INSERT INTO 
+		cp_park_reconciliation_info(result,park_id,trade_no,order_num,local_order_id,local_price_total,local_price_paid,local_price_discount,local_discount_from,pay_type,pay_way,pay_time,platform_price_total,platform_price_paid,platform_price_discount,platform_discount_from,report_date)
+	    VALUES(#{result},#{park_id},#{pf_trade_no},#{pf_order_num},#{pf_local_order_id},#{local_price_total},#{local_price_paid},#{local_price_discount},#{local_discount_from},#{pf_pay_type},#{pf_pay_way},#{pf_pay_time},#{platform_price_total},#{platform_price_paid},#{platform_price_discount},#{from_type},#{report_date})
+	</insert>
+	
+	<select id="findEquipmentInfo" parameterType="map" resultType="map">
+		SELECT * FROM cp_park_equipment WHERE park_id = #{park_id} AND `code`=#{code} AND delflag=0
+	</select>
+	
+	<insert id="addEquipmentAlert" parameterType="map">
+		INSERT INTO cp_park_equipment_alert(equip_id,alarm_event,alaram_desc,time) 
+		VALUES(#{equip_id},#{alarm_event},#{alaram_desc},#{time})
+	</insert>
+	
+	<select id="findPlate" parameterType="String" resultType="String">
+		SELECT plate_number FROM cp_order_enex_record WHERE order_num=#{order_num} LIMIT 1
+	</select>
+	
+	<delete id="delReconciliationInfo" parameterType="map" >
+		DELETE FROM cp_park_reconciliation_info WHERE park_id = #{park_id} AND report_date = #{report_date}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.SendStatusDao">
+
+	<insert id="addMqRecord" parameterType="map">
+		INSERT INTO
+		cp_park_mq_record(park_id,business_code,business_key,
+		message_id,topic,`key`,body)
+		VALUES(#{park_id},#{business_code},#{business_key},
+		#{message_id},#{topic},#{key},#{body})
+	</insert>
+
+	<update id="updateResult" parameterType="map">
+		UPDATE cp_park_mq_record
+		SET result=#{result}
+		WHERE
+		park_id=#{park_id}
+		AND message_id=
+		#{message_id}
+		AND business_code=#{business_code}
+	</update>
+
+	<select id="getBusinessInfo" resultType="map">
+		SELECT
+		business_key AS
+		businessKey,
+		business_code AS businessCode
+		FROM cp_park_mq_record
+		WHERE
+		park_id=#{parkid}
+		AND message_id=#{message_id}
+		AND
+		business_code=#{business_code}
+		LIMIT 1
+	</select>
+
+</mapper>

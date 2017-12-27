@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.LocalUserOndutyDao">
+	
+	<delete id="deleteOnduty" parameterType="String">
+		DELETE FROM cp_park_localuser_onduty
+		WHERE park_id= #{parkId} AND user_account=#{userAccount}
+	</delete>
+	
+</mapper>

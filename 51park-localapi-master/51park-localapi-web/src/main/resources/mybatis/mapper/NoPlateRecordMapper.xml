@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.NoPlateRecordDao">
+	
+	<select id="select" parameterType="int" resultType="NoPlateRecord">
+		SELECT 
+			id,park_id, park_name,en_channel_id,ex_channel_id,temp_plate,
+			UNIX_TIMESTAMP(enter_time) enter_time,UNIX_TIMESTAMP(exit_time)exit_time,
+			openid,status
+		FROM cp_park_noplate_record
+		WHERE id = #{id}
+	</select>
+	
+</mapper>

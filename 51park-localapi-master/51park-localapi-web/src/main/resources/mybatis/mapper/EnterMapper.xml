@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.EnterDao">
+	
+	<insert id="addEnterThirdRecord" parameterType="map">
+		INSERT INTO cp_third_record(order_num,record_type,park_id,plate_number,enter_name,is_send,create_time,update_time)
+		VALUES(#{order_num},#{record_type},#{park_id},#{plate_number},#{enter_name},#{is_send},#{create_time},#{update_time})
+	</insert>
+	
+</mapper>

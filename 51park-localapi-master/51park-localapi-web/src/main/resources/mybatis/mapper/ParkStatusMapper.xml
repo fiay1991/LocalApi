@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.ParkStatusDao">
+	<!-- 新增心跳表 cp_park_status -->
+	<insert id="addStatusInfo" parameterType="map">
+		INSERT INTO cp_park_status(park_id,platform_time,local_time) 
+		VALUES(#{park_id},#{platform_time},#{local_time})
+	</insert>
+	<!-- 更新车场车位记录表 cp_park_carnum -->
+	<update id="updateParkCarnum" parameterType="map">
+		UPDATE cp_park_carnum c 
+		SET c.empty_car_num=#{empty_car_num}, c.update_time=#{update_time} 
+		WHERE c.park_id=#{park_id}
+	</update>
+	
+	<select id="checkoutExisting" parameterType="String" resultType="map">
+	SELECT * FROM cp_park_status WHERE park_id=#{parkid}
+	</select>
+	
+	<update id="updateStatusInfo" parameterType="map">
+		UPDATE cp_park_status s SET s.local_time=#{local_time},s.platform_time=#{platform_time} WHERE s.park_id=#{park_id} 
+	</update>
+	
+	<insert id="addOffLine" parameterType="map">
+		INSERT INTO cp_park_status_offline(park_id,last_connection_time,reconnect_time,off_time) 
+		VALUES(#{park_id},#{last_connection_time},#{reconnect_time},#{off_time})
+	</insert>
+</mapper>

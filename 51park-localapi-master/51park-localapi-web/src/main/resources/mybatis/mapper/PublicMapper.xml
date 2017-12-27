@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.PublicDao">
+
+	<select id="findUidByPlateNum" parameterType="String" resultType="int">
+		SELECT t.`uid` FROM cp_mem_plate_number t 
+		WHERE t.`plate_number`=#{license_plate} 
+		AND t.`status`=1
+	</select>
+	<select id="checkPayRecordReconciliation" parameterType="String" resultType="int">
+	 	SELECT COUNT(*) 
+	 	FROM cp_park_reconciliation_info 
+	 	WHERE trade_no=#{trade_no}
+	</select>
+	
+	<select id="checkReconciliation" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM cp_park_reconciliation 
+		WHERE park_id=#{park_id} 
+		AND report_date = #{report_date}
+	</select>
+	<select id="checkBillPathExist" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM cp_park_bill_path 
+		WHERE park_id=#{park_id} 
+		AND time = #{report_date}
+	</select>
+	
+	<select id="findCardidByUid" parameterType="int" resultType="String">
+		SELECT t.`card_no_qr` AS card_id FROM cp_card_user t 
+		WHERE t.`uid`=#{uid}
+	</select>
+	
+	<select id="getLocalUrl" parameterType="map" resultType="String">
+		SELECT park_url FROM cp_park
+		WHERE id=#{id}
+	</select>
+	<select id="findOrderNum" parameterType="String" resultType="String">
+		SELECT order_num 
+		FROM cp_order_exit 
+		WHERE local_order_id=#{local_orderid}
+	</select>
+</mapper>

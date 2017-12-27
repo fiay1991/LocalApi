@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.localapi.dao.ModifyDao">
+	
+	<update id="updateThirdRecord" parameterType="map">
+		UPDATE cp_third_record SET plate_number=#{plate_number} WHERE order_num=#{order_num}
+	</update>
+	
+</mapper>

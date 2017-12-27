@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD  Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+  
+<configuration>  
+<!-- <settings>  
+        <setting name="logPrefix" value="dao."/>  
+</settings> -->
+	<!-- 类的别名，定义别名后使用时不需要一大串包名的类全名 -->
+    <typeAliases>
+		<!-- wu -->
+      	
+      	
+      	
+      	<!-- wang -->
+      
+     
+	   
+      	<!-- fang -->
+      	<typeAlias type="com.park.localapi.domain.MonthProduct" alias="monthProduct"/>
+      	
+      	<!-- hua -->
+		<typeAlias type="com.park.localapi.domain.request.EnterRequest" alias="enterRequest"/>
+		<typeAlias type="com.park.localapi.domain.OrderInfo" alias="orderInfo"/>
+		<typeAlias type="com.park.localapi.domain.OrderParkLocal" alias="orderParkLocal"/>
+		<typeAlias type="com.park.localapi.domain.ExenRecord" alias="exenRecord"/>
+		<typeAlias type="com.park.localapi.domain.vo.ReconciliationVO" alias="reconciliationVO"/>
+		<typeAlias type="com.park.localapi.domain.NoPlateRecord" alias="NoPlateRecord"/>
+    </typeAliases>
+</configuration>
